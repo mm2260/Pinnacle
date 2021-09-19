@@ -1,5 +1,6 @@
 import json
 import psycopg2
+import random
 from heapq import heappop, heappush
 from typing import Optional, List
 from fastapi import FastAPI, Query
@@ -55,13 +56,37 @@ def get_priority(uid,iid):
 # Routes:
 
 # Throw Grocery item (Fridge)
-#TODO
+@app.get('/fridge/throw/{uid}/{iid}')
+async def throw_item(uid:int, iid:int, q: Optional[str] = None, short: bool = False):
+    command = f"UPDATE fridge SET quantity = 0 WHERE user_id = {uid} and ingredient_id = {iid}"
+    cur.execute(command)
+    conn.commit()
 
 # Add Grocery Item (Fridge)
-#TODO
+@app.get('/fridge/add/{uid}/{iid}')
+async def add_item(uid:int, iid:int, q: Optional[str] = None, short: bool = False):
+    command = f"UPDATE fridge SET quantity = quantity + 1 WHERE user_id = {uid} and ingredient_id = {iid}"
+    cur.execute(command)
+    conn.commit()
+
+    return 1
 
 # Remove Grocery Item (Fridge)
-#TODO
+@app.get('/fridge/remove/{uid}/{iid}')
+async def remove_item(uid:int, iid:int, q: Optional[str] = None, short: bool = False):
+    command = f"SELECT quantity FROM fridge WHERE user_id = {uid} and ingredient_id = {iid}"
+    cur.execute(command)
+    quantity = cur.fetchone()[0]
+
+    if quantity == 0:
+        return 1
+
+    command = f"UPDATE fridge SET quantity = quantity - 1 WHERE user_id = {uid} and ingredient_id = {iid}"
+    cur.execute(command)
+    conn.commit()
+
+    return 1
+
 
 # Heapify Grocery Run 
 
@@ -80,10 +105,30 @@ async def heapify_groceries(items: str):
     return q
 
 # Recommend Recipe 
-#TODO
+@app.get('/recipe/recommend/{uid}')
+async def recommend_recipe(uid:int, q: Optional[str] = None, short: bool = False):
+    
+    command = f"SELECT ingredient_id, AVG(fitness) FROM habits WHERE user_id = {uid} GROUP BY ingredient_id ORDER BY AVG(fitness)"
+    cur.execute(command)
+    res = cur.fetchall()
+
+    outliers_lo = res[:2%len(res)]
+    outliers_hi = res[-(2%len(res)):]
+    outliers = outliers_lo + outliers_hi
+    return random.choice(outliers)
 
 # Query Recipes 
-#TODO
+@app.get('/recipe/{iid}')
+async def query_recipe(iid:int, q: Optional[str] = None, short: bool = False):
+    command = f"SELECT title,full_ingredients,instructions FROM recipes as r , recipe_ingredients as ri WHERE ri.rid = r.recipe_id AND ri.iid ={iid}"
+    cur.execute(command)
+    res = cur.fetchall()
+
+    res = sorted(res, key=lambda x : len(x[1]))
+
+    return random.choice(res[0:3%len(res)])
+    # returns recipe with a low number of ingredients (more or less)
+
 
 #===================================================================================
 
