@@ -1,3 +1,4 @@
+
 ![image logo](./resources/logo_small.png)
 
 # Celery App
@@ -7,10 +8,11 @@ Mitigate food wastage; Find recipes based on what you have lying around & optimi
 
 ---
 <br>
-<br>
+<p align="center">
 
 _____   ![image pinnacle](./resources/pinnacle.png) _____
 
+</p>
 <br>
 
 **Submission for Pinnacle 2021,** \

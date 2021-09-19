@@ -1,5 +1,6 @@
 from fastapi import FastAPI 
-from router import grocery_router
+from router import celery_router
 
 app = FastAPI()
-app.include_router(grocery_router.router, prefix='/grocery')
+app.include_router(celery_router.router, prefix='/grocery')
+
