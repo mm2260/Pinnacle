@@ -10,25 +10,30 @@ app = FastAPI()
 
 #===================================================================================
 
+# For Heroku:
+
 # Initialize DB connection:
 # HOST = os.environ['HOST']
 # DATABASE = os.environ['DATABASE']
 # USER = os.environ['USER']
 # PASSWORD = os.environ['PASSWORD']
 # PORT = os.environ['PORT']
+
+# For Local execution:
+
 HOST = ''
 DATABASE = ''
 USER = ''
 PASSWORD = ''
 PORT = ''
 
-# with open('config.json') as data:
-#     configuration = json.load(data)
-#     HOST = configuration['HOST']
-#     DATABASE = configuration['DATABASE']
-#     USER = configuration['USER']
-#     PASSWORD = configuration['PASSWORD']
-#     PORT = configuration['PORT']
+with open('config.json') as data:
+    configuration = json.load(data)
+    HOST = configuration['HOST']
+    DATABASE = configuration['DATABASE']
+    USER = configuration['USER']
+    PASSWORD = configuration['PASSWORD']
+    PORT = configuration['PORT']
 
 conn = psycopg2.connect( 
     host=HOST,

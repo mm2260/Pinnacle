@@ -44,6 +44,14 @@ public class GroceriesView extends VerticalLayout {
                 parent.remove(this);
             });
 
+            checkbox.addValueChangeListener( e-> {
+                if (checkbox.getValue()) {
+                    checkbox.getElement().getStyle().set("text-decoration", "line-through");
+                } else {
+                    checkbox.getElement().getStyle().remove("text-decoration");
+                }
+            } );
+
             add(checkbox,removeButton);
             setJustifyContentMode(JustifyContentMode.CENTER);
             setAlignItems(Alignment.CENTER);
@@ -85,6 +93,7 @@ public class GroceriesView extends VerticalLayout {
             }
             checkboxGroup.add( new TodoItem( todoTextField.getValue(), checkboxGroup, items ) );
             items.add(todoTextField.getValue());
+            todoTextField.clear();
         });
 
         setSizeFull();
