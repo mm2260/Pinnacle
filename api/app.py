@@ -11,11 +11,16 @@ app = FastAPI()
 #===================================================================================
 
 # Initialize DB connection:
-HOST = os.environ['HOST']
-DATABASE = os.environ['DATABASE']
-USER = os.environ['USER']
-PASSWORD = os.environ['PASSWORD']
-PORT = os.environ['PORT']
+# HOST = os.environ['HOST']
+# DATABASE = os.environ['DATABASE']
+# USER = os.environ['USER']
+# PASSWORD = os.environ['PASSWORD']
+# PORT = os.environ['PORT']
+HOST = ''
+DATABASE = ''
+USER = ''
+PASSWORD = ''
+PORT = ''
 
 # with open('config.json') as data:
 #     configuration = json.load(data)
