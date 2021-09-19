@@ -129,7 +129,22 @@ async def recommend_recipe(uid:int, q: Optional[str] = None, short: bool = False
     return random.choice(outliers)
 
 # Query Recipes 
-@app.get('/recipe/{iid}')
+
+#Directly
+@app.get('/recipe/{rid}')
+async def get_recipe(rid:int, q: Optional[str] = None, short: bool = False):
+    command = f"SELECT title,full_ingredients,instructions FROM recipes as r WHERE r.recipe_id = {rid}"
+    cur.execute(command)
+    res = cur.fetchall()
+
+    res = sorted(res, key=lambda x : len(x[1]))
+
+    return random.choice(res[0:3%len(res)])
+    # returns recipe with a low number of ingredients (more or less)
+
+
+#By ingredient
+@app.get('/recipe/ingredient/{iid}')
 async def query_recipe(iid:int, q: Optional[str] = None, short: bool = False):
     command = f"SELECT title,full_ingredients,instructions FROM recipes as r , recipe_ingredients as ri WHERE ri.rid = r.recipe_id AND ri.iid ={iid}"
     cur.execute(command)

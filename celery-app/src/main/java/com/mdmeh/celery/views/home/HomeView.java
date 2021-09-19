@@ -89,7 +89,7 @@ public class HomeView extends HorizontalLayout {
         ok.addClickListener( e-> {
             if(whatItem.isEmpty())
                 return;
-            
+
             ok.setVisible(false);
             whatItem.setVisible(false);
             whatItem.clear();
