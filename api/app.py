@@ -1,4 +1,5 @@
 import json
+import os
 import psycopg2
 import random
 from heapq import heappop, heappush
@@ -10,19 +11,19 @@ app = FastAPI()
 #===================================================================================
 
 # Initialize DB connection:
-HOST = ''
-DATABASE = ''
-USER = ''
-PASSWORD = ''
-PORT = ''
+HOST = os.environ['HOST']
+DATABASE = os.environ['DATABASE']
+USER = os.environ['USER']
+PASSWORD = os.environ['PASSWORD']
+PORT = os.environ['PORT']
 
-with open('config.json') as data:
-    configuration = json.load(data)
-    HOST = configuration['HOST']
-    DATABASE = configuration['DATABASE']
-    USER = configuration['USER']
-    PASSWORD = configuration['PASSWORD']
-    PORT = configuration['PORT']
+# with open('config.json') as data:
+#     configuration = json.load(data)
+#     HOST = configuration['HOST']
+#     DATABASE = configuration['DATABASE']
+#     USER = configuration['USER']
+#     PASSWORD = configuration['PASSWORD']
+#     PORT = configuration['PORT']
 
 conn = psycopg2.connect( 
     host=HOST,
