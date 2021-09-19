@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <!-- Vaadin project from https://start.vaadin.com/project/ddaf6ec4-4ab3-4b27-8c07-304ec1fc8ac2 -->
+    <!-- Vaadin project from https://start.vaadin.com/project/e623f51d-e9fe-4988-a67f-ba483b8d86d0 -->
     <groupId>com.mdmeh.celery</groupId>
     <artifactId>celery</artifactId>
     <name>Project base for Spring Boot and Vaadin Flow</name>
@@ -10,8 +10,8 @@
     <packaging>jar</packaging>
 
     <properties>
-        <java.version>16</java.version>
-        <vaadin.version>22.0.0.alpha3</vaadin.version>
+        <java.version>11</java.version>
+        <vaadin.version>21.0.1</vaadin.version>
     </properties>
 
     <parent>
@@ -66,6 +66,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- https://mvnrepository.com/artifact/javax.persistence/javax.persistence-api -->
+            <dependency>
+                <groupId>javax.persistence</groupId>
+                <artifactId>javax.persistence-api</artifactId>
+                <version>2.2</version>
+            </dependency>
+
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-bom</artifactId>
