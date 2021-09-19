@@ -34,3 +34,9 @@
   align-items: center;
   display: flex;
 }
+
+.recipeContainer {
+  background: #eeeeee;
+  border-radius: 10px;
+  cursor: pointer;
+}

@@ -98,9 +98,13 @@ public class HomeView extends HorizontalLayout {
             finishedButton.setEnabled(true);
         } );
 
+        Label separator = new Label("~~=============================~~");
+
+
+
         // Finishing up...
 
-        add(logo, actionButtons);
+        add(logo, actionButtons, separator);
 
         setJustifyContentMode(JustifyContentMode.CENTER);
         setAlignItems(Alignment.CENTER);

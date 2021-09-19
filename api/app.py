@@ -115,6 +115,34 @@ async def heapify_groceries(items: str):
     q = [ int(x[1]) for x in q ]
     return q
 
+# Get recipe data (full) 
+@app.get('/recipe/fetch/title/{rid}')
+async def get_recipe_title(rid:int, q: Optional[str] = None, short: bool = False):
+    
+    command = f"SELECT title FROM recipes as r where r.recipe_id = {rid}"
+
+    cur.execute(command)
+    res = cur.fetchone()
+    return res[0]
+
+@app.get('/recipe/fetch/ingredients/{rid}')
+async def get_recipe_fi(rid:int, q: Optional[str] = None, short: bool = False):
+    
+    command = f"SELECT full_ingredients FROM recipes as r where r.recipe_id = {rid}"
+
+    cur.execute(command)
+    res = cur.fetchone()
+    return str(' || '.join(res[0]))
+
+@app.get('/recipe/fetch/instructions/{rid}')
+async def get_recipe_instructions(rid:int, q: Optional[str] = None, short: bool = False):
+    
+    command = f"SELECT instructions FROM recipes as r where r.recipe_id = {rid}"
+
+    cur.execute(command)
+    res = cur.fetchone()
+    return str(res[0])
+
 # Recommend Recipe 
 @app.get('/recipe/recommend/{uid}')
 async def recommend_recipe(uid:int, q: Optional[str] = None, short: bool = False):
