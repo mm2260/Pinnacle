@@ -1,33 +1,30 @@
 package com.mdmeh.celery.views.recipes;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mdmeh.celery.views.home.HomeView;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.PageTitle;
 import com.mdmeh.celery.views.MainLayout;
 import com.vaadin.flow.server.*;
 
-import javax.annotation.PostConstruct;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.HashSet;
 
 
 @PageTitle("Recipes")
@@ -35,7 +32,7 @@ import java.util.Arrays;
 public class RecipesView extends VerticalLayout {
 
     RecipeContainer recipeContainer;
-    RecipeContainer recipeContainer1;
+    Button refresh;
 
     private static class RecipeContainer extends VerticalLayout {
 
@@ -61,51 +58,6 @@ public class RecipesView extends VerticalLayout {
             this.setAlignItems(Alignment.START);
 
         }
-    }
-
-    public RecipesView() {
-
-        // Fridge:
-        Accordion fridgeAccordion = new Accordion();
-        VerticalLayout fridgeItems = new VerticalLayout();
-        fridgeItems.add( new Label("Test") );
-        fridgeAccordion.add("Your Fridge", fridgeItems);
-
-        fridgeAccordion.close();
-
-        // Recipes:
-
-        Label seperator = new Label("~~=============================~~");
-        Label recipesLabel = new Label("Recipes 🧾");
-        recipesLabel.getElement().getStyle().set("fontWeight","bold");
-
-        ComboBox<String> ingredientFilter = new ComboBox<>();
-        ingredientFilter.setLabel("Filter recipes by ingredient");
-        ingredientFilter.setReadOnly(true);
-
-        recipeContainer = new RecipeContainer(0);
-        recipeContainer1 = new RecipeContainer(1);
-
-        Button refresh = new Button( VaadinIcon.REFRESH.create() );
-
-        refresh.setWidth("320px");
-
-        // Fin
-
-        VerticalLayout content = new VerticalLayout(recipeContainer, recipeContainer1, refresh);
-        content.setAlignItems(Alignment.CENTER);
-        content.setJustifyContentMode(JustifyContentMode.CENTER);
-        content.setWidthFull();
-
-        add(fridgeAccordion, seperator, recipesLabel, ingredientFilter,content);
-
-        ingredientFilter.setWidthFull();
-
-        setSizeFull();
-        setJustifyContentMode(JustifyContentMode.START);
-        setDefaultHorizontalComponentAlignment(Alignment.START);
-        getStyle().set("text-align", "center");
-        setClassName("recipesView");
     }
 
     private void populate_container(RecipeContainer recipeContainer, UI ui) {
@@ -144,13 +96,167 @@ public class RecipesView extends VerticalLayout {
             }
         }.start();
     }
+
+    private static class FridgeItem extends HorizontalLayout {
+
+        VerticalLayout parent;
+        String label;
+
+        public FridgeItem(String label, VerticalLayout parent, HashSet<String> items) {
+
+            this.label = label;
+            this.parent = parent;
+
+            Checkbox checkbox = new Checkbox();
+            checkbox.setLabel(label);
+            checkbox.setValue(false);
+
+            Button removeButton = new Button(new Icon(VaadinIcon.CLOSE));
+            removeButton.addClickListener( e-> {
+                items.remove(this.label);
+                parent.remove(this);
+            });
+
+            checkbox.addValueChangeListener( e-> {
+                if (checkbox.getValue()) {
+                    checkbox.getElement().getStyle().set("text-decoration", "line-through");
+                } else {
+                    checkbox.getElement().getStyle().remove("text-decoration");
+                }
+            } );
+
+            add(checkbox,removeButton);
+            setJustifyContentMode(JustifyContentMode.CENTER);
+            setAlignItems(Alignment.CENTER);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.label.hashCode();
+        }
+
+    }
+
+    private void repopulate_container(RecipeContainer recipeContainer, UI ui) {
+        new Thread() {
+            public void run() {
+                try {
+
+                    URL url = new URL("http://127.0.0.1:8000/recipe/recommend/1");
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestProperty("accept", "application/json");
+                    InputStream responseStream = connection.getInputStream();
+                    String ridStr = new String(responseStream.readAllBytes(), StandardCharsets.UTF_8);
+                    int rid = Integer.parseInt(ridStr);
+
+                    url = new URL("http://127.0.0.1:8000/recipe/fetch/title/"+rid);
+                    connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestProperty("accept", "application/json");
+                    responseStream = connection.getInputStream();
+                    String title = new String(responseStream.readAllBytes(), StandardCharsets.UTF_8);
+
+                    url = new URL("http://127.0.0.1:8000/recipe/fetch/ingredients/"+rid);
+                    connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestProperty("accept", "application/json");
+                    responseStream = connection.getInputStream();
+                    String ingredients = new String(responseStream.readAllBytes(), StandardCharsets.UTF_8);
+
+                    url = new URL("http://127.0.0.1:8000/recipe/fetch/instructions/"+rid);
+                    connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestProperty("accept", "application/json");
+                    responseStream = connection.getInputStream();
+                    String instructions = new String(responseStream.readAllBytes(), StandardCharsets.UTF_8);
+
+                    ui.access( () -> {
+                        recipeContainer.recipe.add(title, new VerticalLayout(
+                                new H4("Ingredients:"),new Label(ingredients),
+                                new H4("Instructions:"),new Label(instructions)) );
+                    } );
+
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+    }
+
+    public RecipesView() {
+
+        // Fridge:
+        Accordion fridgeAccordion = new Accordion();
+        VerticalLayout fridgeItems = new VerticalLayout();
+
+        HorizontalLayout todoInput = new HorizontalLayout();
+        TextField todoTextField = new TextField();
+        Button addTodo = new Button("Add");
+        todoTextField.setPlaceholder("Enter new item...");
+        todoInput.add(todoTextField, addTodo);
+
+        VerticalLayout checkboxGroup = new VerticalLayout();
+        HashSet<String> items = new HashSet<>();
+
+        addTodo.addClickListener( e -> {
+            if (todoTextField.isEmpty() || items.contains(todoTextField.getValue()) ) {
+                return;
+            }
+            checkboxGroup.add( new FridgeItem( todoTextField.getValue(), checkboxGroup, items ) );
+            items.add(todoTextField.getValue());
+            todoTextField.clear();
+        });
+
+        setSizeFull();
+        setJustifyContentMode(JustifyContentMode.START);
+        setDefaultHorizontalComponentAlignment(Alignment.CENTER);
+        getStyle().set("text-align", "to");
+
+
+        fridgeAccordion.add("Your Fridge", new VerticalLayout( todoInput, checkboxGroup ));
+        fridgeAccordion.close();
+
+        // Recipes:
+
+        Label seperator = new Label("~~=============================~~");
+        Label recipesLabel = new Label("Recipes 🧾");
+        recipesLabel.getElement().getStyle().set("fontWeight","bold");
+
+        ComboBox<String> ingredientFilter = new ComboBox<>();
+        ingredientFilter.setLabel("Filter recipes by ingredient");
+        ingredientFilter.setReadOnly(true);
+
+        recipeContainer = new RecipeContainer(0);
+
+        refresh = new Button( VaadinIcon.REFRESH.create() );
+        refresh.setWidth("320px");
+
+        // Fin
+
+        VerticalLayout content = new VerticalLayout(recipeContainer, refresh);
+        content.setAlignItems(Alignment.CENTER);
+        content.setJustifyContentMode(JustifyContentMode.CENTER);
+        content.setWidthFull();
+
+        add(fridgeAccordion, seperator, recipesLabel, ingredientFilter,content);
+
+        ingredientFilter.setWidthFull();
+
+        setSizeFull();
+        setJustifyContentMode(JustifyContentMode.START);
+        setDefaultHorizontalComponentAlignment(Alignment.START);
+        getStyle().set("text-align", "center");
+        setClassName("recipesView");
+    }
+
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
 
         var ui = getUI().get();
         populate_container(recipeContainer, ui);
-        populate_container(recipeContainer1, ui);
+
+        refresh.addClickListener( e -> {
+            repopulate_container( recipeContainer, ui );
+        } );
 
     }
 }

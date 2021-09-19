@@ -151,10 +151,28 @@ async def recommend_recipe(uid:int, q: Optional[str] = None, short: bool = False
     cur.execute(command)
     res = cur.fetchall()
 
+    print(2%len(res))
+
     outliers_lo = res[:2%len(res)]
     outliers_hi = res[-(2%len(res)):]
     outliers = outliers_lo + outliers_hi
-    return random.choice(outliers)
+    
+    iid = random.choice(outliers)[0]
+    
+    command = f"SELECT recipe_id, title,full_ingredients,instructions FROM recipes as r , recipe_ingredients as ri WHERE ri.rid = r.recipe_id AND ri.iid ={iid}"
+    cur.execute(command)
+    res = cur.fetchall()
+
+    if res == None or len(res)==0:
+        command = f"SELECT recipe_id, title,full_ingredients,instructions FROM recipes"
+        cur.execute(command)
+        return random.choice(cur.fetchall())[0]
+
+    res = sorted(res, key=lambda x : len(x[1]))
+
+    return random.choice(res[0:3%len(res)])[0]
+    # returns recipe with a low number of ingredients (more or less)
+
 
 # Query Recipes 
 
